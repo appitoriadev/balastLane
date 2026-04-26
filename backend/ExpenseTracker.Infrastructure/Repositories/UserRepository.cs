@@ -23,7 +23,7 @@ public class UserRepository : IUserRepository
             await connection.OpenAsync();
 
             using (var command = new NpgsqlCommand(
-                "SELECT id, username, password_hash, firstname, lastname, created_at FROM dbo.users ORDER BY created_at DESC",
+                "SELECT id, username, password_hash, firstname, lastname, created_at, email, refresh_token, refresh_token_expiry FROM dbo.users ORDER BY created_at DESC",
                 connection))
             {
                 using (var reader = await command.ExecuteReaderAsync())
@@ -46,7 +46,7 @@ public class UserRepository : IUserRepository
             await connection.OpenAsync();
 
             using (var command = new NpgsqlCommand(
-                "SELECT id, username, password_hash, firstname, lastname, created_at FROM dbo.users WHERE id = @id",
+                "SELECT id, username, password_hash, firstname, lastname, created_at, email, refresh_token, refresh_token_expiry FROM dbo.users WHERE id = @id",
                 connection))
             {
                 command.Parameters.AddWithValue("@id", id);
@@ -71,10 +71,35 @@ public class UserRepository : IUserRepository
             await connection.OpenAsync();
 
             using (var command = new NpgsqlCommand(
-                "SELECT id, username, password_hash, firstname, lastname, created_at FROM dbo.users WHERE username = @username",
+                "SELECT id, username, password_hash, firstname, lastname, created_at, email, refresh_token, refresh_token_expiry FROM dbo.users WHERE username = @username",
                 connection))
             {
                 command.Parameters.AddWithValue("@username", username);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        return MapFromReader(reader);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        using (var connection = _connectionProvider.CreateConnection())
+        {
+            await connection.OpenAsync();
+
+            using (var command = new NpgsqlCommand(
+                "SELECT id, username, password_hash, firstname, lastname, created_at, email, refresh_token, refresh_token_expiry FROM dbo.users WHERE email = @email",
+                connection))
+            {
+                command.Parameters.AddWithValue("@email", email);
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {
@@ -96,8 +121,8 @@ public class UserRepository : IUserRepository
             await connection.OpenAsync();
 
             using (var command = new NpgsqlCommand(
-                @"INSERT INTO dbo.users (username, password_hash, firstname, lastname)
-                  VALUES (@username, @passwordHash, @firstName, @lastName)
+                @"INSERT INTO dbo.users (username, password_hash, firstname, lastname, email, refresh_token, refresh_token_expiry)
+                  VALUES (@username, @passwordHash, @firstName, @lastName, @email, @refreshToken, @refreshTokenExpiry)
                   RETURNING id, created_at",
                 connection))
             {
@@ -105,6 +130,9 @@ public class UserRepository : IUserRepository
                 command.Parameters.AddWithValue("@passwordHash", user.PasswordHash);
                 command.Parameters.AddWithValue("@firstName", user.FirstName);
                 command.Parameters.AddWithValue("@lastName", user.LastName);
+                command.Parameters.AddWithValue("@email", (object?)user.Email ?? DBNull.Value);
+                command.Parameters.AddWithValue("@refreshToken", (object?)user.RefreshToken ?? DBNull.Value);
+                command.Parameters.AddWithValue("@refreshTokenExpiry", (object?)user.RefreshTokenExpiry ?? DBNull.Value);
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {
@@ -131,7 +159,10 @@ public class UserRepository : IUserRepository
                   SET username = @username,
                       password_hash = @passwordHash,
                       firstname = @firstName,
-                      lastname = @lastName
+                      lastname = @lastName,
+                      email = @email,
+                      refresh_token = @refreshToken,
+                      refresh_token_expiry = @refreshTokenExpiry
                   WHERE id = @id",
                 connection))
             {
@@ -140,6 +171,9 @@ public class UserRepository : IUserRepository
                 command.Parameters.AddWithValue("@passwordHash", user.PasswordHash);
                 command.Parameters.AddWithValue("@firstName", user.FirstName);
                 command.Parameters.AddWithValue("@lastName", user.LastName);
+                command.Parameters.AddWithValue("@email", (object?)user.Email ?? DBNull.Value);
+                command.Parameters.AddWithValue("@refreshToken", (object?)user.RefreshToken ?? DBNull.Value);
+                command.Parameters.AddWithValue("@refreshTokenExpiry", (object?)user.RefreshTokenExpiry ?? DBNull.Value);
 
                 var rowsAffected = await command.ExecuteNonQueryAsync();
                 return rowsAffected > 0 ? user : null;
@@ -172,6 +206,9 @@ public class UserRepository : IUserRepository
             PasswordHash = reader.GetString(2),
             FirstName = reader.GetString(3),
             LastName = reader.GetString(4),
-            CreatedAt = reader.GetDateTime(5)
+            CreatedAt = reader.GetDateTime(5),
+            Email = reader.IsDBNull(6) ? null : reader.GetString(6),
+            RefreshToken = reader.IsDBNull(7) ? null : reader.GetString(7),
+            RefreshTokenExpiry = reader.IsDBNull(8) ? null : reader.GetDateTime(8)
         };
 }
