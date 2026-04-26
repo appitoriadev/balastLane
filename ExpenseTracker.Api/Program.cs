@@ -79,14 +79,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-//Option 2: Table creation in case Tasks.json doesn't work.
-// using (var scope = app.Services.CreateScope())
-// {
-//     var connectionProvider = scope.ServiceProvider.GetRequiredService<ConnectionProvider>();
-//     var _path = Environment.GetEnvironmentVariable("CONNECTIONSTRING_SQLPATH") ?? throw new InvalidOperationException("SQL Schema Path is not configured.");
-//     await connectionProvider.EnsureSchemaAsync(_path);
-// }
-
 // ── Middleware pipeline ───────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
 {
