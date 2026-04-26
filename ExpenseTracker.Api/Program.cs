@@ -20,7 +20,13 @@ builder.Services.AddSingleton(new ConnectionProvider(_connectionString));
 
 // ── Dependency Injection ──────────────────────────────────────────────────────
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserExpenseRepository, UserExpenseRepository>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserExpenseService, UserExpenseService>();
 builder.Services.AddHttpContextAccessor();
 
 // ── JWT Authentication ────────────────────────────────────────────────────────
