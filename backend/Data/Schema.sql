@@ -39,9 +39,12 @@ CREATE TABLE IF NOT EXISTS dbo.users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   username VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
-  firstname VARCHAR(255) UNIQUE NOT NULL,
-  lastname VARCHAR(255) UNIQUE NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  firstname VARCHAR(255) NOT NULL,
+  lastname VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  email VARCHAR(255) UNIQUE,
+  refresh_token VARCHAR(512),
+  refresh_token_expiry TIMESTAMP
 );
 
 
@@ -61,7 +64,12 @@ CREATE TABLE IF NOT EXISTS dbo.user_expenses (
 
 
 -- Create indexes on user_expenses_id for faster lookups
-CREATE INDEX IF NOT EXISTS idx_userexpenses_ids ON dbo.users (id);
+CREATE INDEX IF NOT EXISTS idx_userexpenses_ids ON dbo.user_expenses (user_id);
 
 -- Create indexes on expenses_id for faster lookups
-CREATE INDEX IF NOT EXISTS idx_expenses_ids ON dbo.users (id);
+CREATE INDEX IF NOT EXISTS idx_expenses_ids ON dbo.user_expenses (expenses_id);
+
+-- Auth columns added for JWT refresh-token support
+ALTER TABLE dbo.users ADD COLUMN IF NOT EXISTS email VARCHAR(255) UNIQUE;
+ALTER TABLE dbo.users ADD COLUMN IF NOT EXISTS refresh_token VARCHAR(512);
+ALTER TABLE dbo.users ADD COLUMN IF NOT EXISTS refresh_token_expiry TIMESTAMP;
