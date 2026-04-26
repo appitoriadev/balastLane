@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Infrastructu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Api", "ExpenseTracker.Api\ExpenseTracker.Api.csproj", "{DDFE6395-107E-4489-99E7-AA4E46D1B0EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Tests", "ExpenseTracker.Tests\ExpenseTracker.Tests.csproj", "{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,18 @@ Global
 		{DDFE6395-107E-4489-99E7-AA4E46D1B0EE}.Release|x64.Build.0 = Release|Any CPU
 		{DDFE6395-107E-4489-99E7-AA4E46D1B0EE}.Release|x86.ActiveCfg = Release|Any CPU
 		{DDFE6395-107E-4489-99E7-AA4E46D1B0EE}.Release|x86.Build.0 = Release|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Debug|x64.Build.0 = Debug|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Debug|x86.Build.0 = Debug|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Release|x64.ActiveCfg = Release|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Release|x64.Build.0 = Release|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Release|x86.ActiveCfg = Release|Any CPU
+		{BE29A975-B4B4-45AE-BEEE-A52A7DBD4F0B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

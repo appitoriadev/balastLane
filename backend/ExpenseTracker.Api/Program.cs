@@ -27,13 +27,14 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserExpenseService, UserExpenseService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
 
 // ── JWT Authentication ────────────────────────────────────────────────────────
 var JWT_KEY = Environment.GetEnvironmentVariable("JWT_KEY")
 ?? throw new InvalidOperationException("JWT Key is not configured.");
 
-var JWT_ISSUER = Environment.GetEnvironmentVariable("JWT_KEY")
+var JWT_ISSUER = Environment.GetEnvironmentVariable("JWT_ISSUER")
 ?? throw new InvalidOperationException("JWT Issuer is not configured.");
 
 var JWT_AUDIENCE = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
