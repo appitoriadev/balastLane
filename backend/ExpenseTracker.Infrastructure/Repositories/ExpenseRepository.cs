@@ -64,6 +64,31 @@ public class ExpenseRepository : IExpenseRepository
         return null;
     }
 
+    public async Task<Expense?> GetByNameAsync(string title)
+    {
+        using (var connection = _connectionProvider.CreateConnection())
+        {
+            await connection.OpenAsync();
+
+            using (var command = new NpgsqlCommand(
+                "SELECT e.id, e.title, e.amount, e.category_id, c.category_name, e.expense_date FROM dbo.expenses e JOIN dbo.categories c ON e.category_id = c.id WHERE e.title = @title",
+                connection))
+            {
+                command.Parameters.AddWithValue("@title", title);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        return MapFromReader(reader);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     public async Task<Expense> AddAsync(Expense expense)
     {
         using (var connection = _connectionProvider.CreateConnection())

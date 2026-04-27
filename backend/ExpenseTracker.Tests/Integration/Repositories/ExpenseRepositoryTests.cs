@@ -140,7 +140,7 @@ public class ExpenseRepositoryTests : IAsyncLifetime
     private async Task ClearExpenses()
     {
         using var cmd = _connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM dbo.dbo.expenses";
+        cmd.CommandText = "DELETE FROM dbo.expenses";
         await cmd.ExecuteNonQueryAsync();
     }
 

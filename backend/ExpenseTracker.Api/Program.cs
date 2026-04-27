@@ -84,7 +84,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Expense Tracker REST API",
         Version = "v1",
-        Description = "REST API for IoT device management with Supabase PostgreSQL"
+        Description = "REST API for the Expense Tracker application"
     });
 
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme

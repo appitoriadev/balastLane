@@ -10,10 +10,17 @@ export function AuthProvider({ children }) {
   const navigate                = useNavigate();
 
   // On mount, restore session from stored token.
-  // The backend has no /me endpoint, so we simply check token presence.
+  // Decode the JWT payload (base64url) to read the username claim without a /me endpoint.
   useEffect(() => {
-    if (authService.isAuthenticated()) {
-      setUser({ username: 'admin' });
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const username = payload['unique_name'] || payload['sub'] || 'unknown';
+        setUser({ username });
+      } catch {
+        authService.logout();
+      }
     }
     setLoading(false);
   }, []);
