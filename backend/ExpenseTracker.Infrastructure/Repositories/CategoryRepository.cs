@@ -64,6 +64,31 @@ public class CategoryRepository : ICategoryRepository
         return null;
     }
 
+    public async Task<Category?> GetByNameAsync(string name)
+    {
+        using (var connection = _connectionProvider.CreateConnection())
+        {
+            await connection.OpenAsync();
+
+            using (var command = new NpgsqlCommand(
+                "SELECT id, category_name, created_at FROM dbo.categories WHERE category_name = '@name'",
+                connection))
+            {
+                command.Parameters.AddWithValue("@name", name);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        return MapFromReader(reader);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     public async Task<Category> AddAsync(Category category)
     {
         using (var connection = _connectionProvider.CreateConnection())
