@@ -5,7 +5,7 @@
  * go to the same origin and get forwarded to localhost:5157.
  * In production, set VITE_API_URL to your deployed backend URL.
  */
-const BASE_URL = import.meta.env.VITE_API_URL || '';
+const BASE_URL = '';
 
 const getToken = () => localStorage.getItem('et_token');
 

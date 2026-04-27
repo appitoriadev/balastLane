@@ -7,10 +7,11 @@ import Button from '../components/ui/Button';
 import Skeleton from '../components/ui/Skeleton';
 import Alert from '../components/ui/Alert';
 import Icon from '../components/ui/Icon';
-import { DEFAULT_CATEGORIES } from '../constants';
+import { useCategories } from '../hooks/useCategories';
 
 export default function ExpensesPage() {
   const { expenses, loading, error } = useExpenses();
+  const { categories: apiCategories } = useCategories();
 
   const [modal,  setModal]  = useState(null);
   const [search, setSearch] = useState('');
@@ -22,7 +23,7 @@ export default function ExpensesPage() {
     return true;
   });
 
-  const categories = ['All', ...DEFAULT_CATEGORIES];
+  const categories = ['All', ...apiCategories];
 
   return (
     <div className="max-w-4xl mx-auto px-5 py-7 animate-fade-in">

@@ -1,7 +1,7 @@
 import DonutChart from '../charts/DonutChart';
 import Skeleton from '../ui/Skeleton';
 import { formatCurrency } from '../../utils/formatters';
-import { CATEGORY_COLORS, DEFAULT_CATEGORIES } from '../../constants';
+import { CATEGORY_COLORS } from '../../constants';
 
 /**
  * Donut chart + category legend for the dashboard.
@@ -11,10 +11,11 @@ import { CATEGORY_COLORS, DEFAULT_CATEGORIES } from '../../constants';
  *   total: number,
  *   loading: boolean,
  *   currencySymbol: string,
+ *   categories: string[],
  * }} props
  */
-export default function CategoryBreakdown({ expenses, total, loading, currencySymbol }) {
-  const chartData = DEFAULT_CATEGORIES
+export default function CategoryBreakdown({ expenses, total, loading, currencySymbol, categories }) {
+  const chartData = categories
     .map((cat) => ({
       label: cat,
       color: CATEGORY_COLORS[cat],

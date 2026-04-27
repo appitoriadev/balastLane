@@ -1,0 +1,56 @@
+{
+    "data": [
+        [
+            {
+                "username": "appitoria",
+                "email": "string@mail.com",
+                "password": "appitoria",
+                "firstName": "Laura",
+                "lastName": "Velez"
+            },
+            {
+                "username": "appitoria1",
+                "email": "appitoria1@mail.com",
+                "password": "appitoria1",
+                "firstName": "Laura1",
+                "lastName": "Velez"
+            }
+        ],
+        [
+            {
+                "username": "appitoria",
+                "password": "appitoria"
+            },
+            {
+                "username": "appitoria1",
+                "password": "appitoria1"
+            }
+        ],
+        [
+            {
+                "title": "Rent",
+                "amount": 500,
+                "category": "Housing",
+                "date": "2026-04-27T16:43:46.094Z"
+            },
+            {
+                "title": "Vacations",
+                "amount": 1550,
+                "category": "Vacations",
+                "date": "2026-04-27T16:43:46.094Z"
+            }
+        ]
+    ]
+}
+
+{
+  "userId": 1,
+  "username": "appitoria",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiYXBwaXRvcmlhIiwianRpIjoiZWNhY2I4MTAtZDRhMy00YjNlLTkwMWUtODZmMTMwZjE3Njg3IiwiZXhwIjoxNzc3MzEzNjM3LCJpc3MiOiJFeHBlbnNlVHJhY2tlckFwaSIsImF1ZCI6IkV4cGVuc2VUcmFja2VyQ2xpZW50In0.eFf-Nuy-W-h2tKU9ZmPMjkS_nLXvlVceutW7BIUQvcQ",
+  "refreshToken": "/Z1bDDCE5gWhbYKL3+sa7nEx5AD8nppnuEF2yrN4H2E7epp8xi78hGddMUULTjCLTd6nKw2xyvFO66Fhng1kdA==",
+  "expiresAt": "2026-04-27T18:13:57.6080631Z"
+}
+
+docker inspect -f '{{.State.Pid}}' expenseTracker-api
+docker top expenseTracker-api
+docker inspect -f '{{.State.Pid}}' expenseTracker-api | xargs -I {} ps -o pid= -p {} 2>/dev/null || docker inspect expenseTracker-api | grep -A 10 "Pid" | head -n 1

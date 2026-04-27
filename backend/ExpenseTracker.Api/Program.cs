@@ -127,7 +127,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("ReactFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

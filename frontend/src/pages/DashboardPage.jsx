@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useCategories } from '../hooks/useCategories';
 import { useExpenses } from '../contexts/ExpensesContext';
 import SummaryCards from '../components/dashboard/SummaryCards';
 import CategoryBreakdown from '../components/dashboard/CategoryBreakdown';
@@ -19,6 +20,7 @@ const inMonth = (expenses, month, year) =>
 
 export default function DashboardPage() {
   const { expenses, loading, error } = useExpenses();
+  const { categories } = useCategories();
   const [modal, setModal] = useState(null); // null | { type: 'add'|'edit'|'delete', expense? }
 
   const now      = new Date();
@@ -66,6 +68,7 @@ export default function DashboardPage() {
         total={totalThisMonth}
         loading={loading}
         currencySymbol="$"
+        categories={categories}
       />
 
       {/* Recent expenses */}
