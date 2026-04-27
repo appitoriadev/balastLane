@@ -1,4 +1,4 @@
-# BalastLane Frontend — Agent Specification
+# Expense Tracker Frontend — Agent Specification
 
 React 18 frontend for the ExpenseTracker .NET 10 Clean Architecture API. This document is for AI agents to understand the codebase structure, constraints, and patterns.
 

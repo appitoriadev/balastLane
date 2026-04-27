@@ -1,4 +1,4 @@
-# BalastLane API — Agent Specification
+# Expense Tracker API — Agent Specification
 
 Expense Tracker API built with Clean Architecture. This document is for AI agents to understand the codebase structure, constraints, and validation rules.
 
