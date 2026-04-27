@@ -14,19 +14,54 @@ ExpenseTracker/
 ├── ExpenseTracker.sln
 └── 
     ├── ExpenseTracker.Domain/          ← zero external deps
-    │   ├── Entities/Expense.cs
-    │   └── Interfaces/IExpenseRepository.cs
+    │   ├── Entities/
+    │   │   ├── Expense.cs
+    │   │   ├── Category.cs
+    │   │   ├── User.cs
+    │   │   └── UserExpense.cs
+    │   └── Interfaces/
+    │       ├── IExpenseRepository.cs
+    │       ├── ICategoryRepository.cs
+    │       ├── IUserRepository.cs
+    │       └── IUserExpenseRepository.cs
     ├── ExpenseTracker.Application/     ← depends on Domain only
-    │   ├── DTOs/{Create,Update,Response}ExpenseDto.cs
-    │   ├── Interfaces/IExpenseService.cs
-    │   └── Services/ExpenseService.cs
+    │   ├── DTOs/
+    │   │   ├── {Create,Update,Response}ExpenseDto.cs
+    │   │   ├── {Create,Update}CategoryDto.cs
+    │   │   ├── {Create,Update}UserDto.cs
+    │   │   ├── AuthResponse.cs
+    │   │   ├── LoginRequest.cs
+    │   │   └── UserExpenseDto.cs
+    │   ├── Interfaces/
+    │   │   ├── IExpenseService.cs
+    │   │   ├── ICategoryService.cs
+    │   │   ├── IUserService.cs
+    │   │   ├── IUserExpenseService.cs
+    │   │   └── IAuthService.cs
+    │   └── Services/
+    │       ├── ExpenseService.cs
+    │       ├── CategoryService.cs
+    │       ├── UserService.cs
+    │       ├── UserExpenseService.cs
+    │       └── AuthService.cs
     ├── ExpenseTracker.Infrastructure/  ← depends on Domain only
-    │   ├── Data/ConnectionProvider.cs
-    │   ├── Data/Schema.sql
-    │   └── Repositories/ExpenseRepository.cs
+    │   ├── Data/
+    │   │   ├── ConnectionProvider.cs
+    │   │   └── Schema.sql
+    │   └── Repositories/
+    │       ├── ExpenseRepository.cs
+    │       ├── CategoryRepository.cs
+    │       ├── UserRepository.cs
+    │       └── UserExpenseRepository.cs
     ├── ExpenseTracker.Api/             ← depends on Application + Infrastructure
-    │   ├── Controllers/AuthController.cs
-    │   ├── Controllers/ExpensesController.cs
+    │   ├── Controllers/
+    │   │   ├── AuthController.cs
+    │   │   ├── ExpensesController.cs
+    │   │   ├── CategoriesController.cs
+    │   │   ├── UsersController.cs
+    │   │   └── UserExpensesController.cs
+    │   ├── Middleware/
+    │   │   └── ExceptionHandlingMiddleware.cs
     │   ├── Program.cs
     │   ├── appsettings.json
     │   └── appsettings.Development.json
@@ -34,15 +69,19 @@ ExpenseTracker/
         ├── Unit/
         │   ├── Services/
         │   │   ├── ExpenseServiceTests.cs       (95+ test cases)
-        │   │   └── UserServiceTests.cs          (60+ test cases)
+        │   │   ├── UserServiceTests.cs          (60+ test cases)
+        │   │   └── CategoryServiceTests.cs
         │   └── Entities/
         │       └── ExpenseTests.cs              (5+ test cases)
         ├── Integration/
         │   ├── Repositories/
-        │   │   └── ExpenseRepositoryTests.cs    (10+ test cases)
+        │   │   ├── ExpenseRepositoryTests.cs    (10+ test cases)
+        │   │   └── UserRepositoryTests.cs
         │   └── Controllers/
         │       ├── ExpensesControllerTests.cs   (10+ test cases)
-        │       └── AuthControllerTests.cs       (8+ test cases)
+        │       ├── AuthControllerTests.cs       (8+ test cases)
+        │       ├── CategoriesControllerTests.cs
+        │       └── UsersControllerTests.cs
         ├── Fixtures/
         │   ├── DatabaseFixture.cs               (PostgreSQL test container)
         │   └── DatabaseCollection.cs            (xUnit collection definition)
@@ -117,34 +156,43 @@ dotnet add ExpenseTracker.Tests/ExpenseTracker.Tests.csproj \
 
 ### Domain
 
-**`Entities/Expense.cs`** — plain POCO, no attributes needed  
-**`Interfaces/IExpenseRepository.cs`** — GetAll, GetById, Add, Update, Delete (all async)
+**`Entities/Expense.cs`** — Plain POCO: Id (Guid), Title, Amount, CategoryName, Date  
+**`Entities/Category.cs`** — Plain POCO: Id (Guid), CategoryName  
+**`Entities/User.cs`** — Plain POCO: Id (Guid), Username, PasswordHash, FirstName, LastName, Email, RefreshToken, RefreshTokenExpiry  
+**`Entities/UserExpense.cs`** — Junction entity: Id (Guid), ExpensesId (Guid), UserId (Guid)  
+**`Interfaces/IExpenseRepository.cs`** — GetAll, GetById, Add, Update, Delete, GetByNameAsync (all async)  
+**`Interfaces/ICategoryRepository.cs`** — GetAll, GetById, Add, Update, Delete, GetByNameAsync (all async)  
+**`Interfaces/IUserRepository.cs`** — GetAll, GetById, Add, Update, Delete, GetByUsername (all async)  
+**`Interfaces/IUserExpenseRepository.cs`** — GetAll, GetById, Add, Delete (all async)
 
 ### Application
 
 DTOs as C# `record` types (immutable value carriers, no AutoMapper dependency).  
-**`ExpenseService.cs`** — maps entities↔DTOs, delegates to `IExpenseRepository`.
+**`Services/ExpenseService.cs`** — maps entities↔DTOs, delegates to `IExpenseRepository`  
+**`Services/CategoryService.cs`** — manages category CRUD operations, delegates to `ICategoryRepository`  
+**`Services/UserService.cs`** — manages user CRUD operations, delegates to `IUserRepository`  
+**`Services/UserExpenseService.cs`** — manages user-expense relationships, delegates to `IUserExpenseRepository`  
+**`Services/AuthService.cs`** — handles user authentication, JWT token generation with refresh tokens, BCrypt password hashing
 
 ### Infrastructure
 
-**`ConnectionProvider.cs`** — Singleton service providing NpgsqlConnection with connection string from appsettings.
-**`ExpenseRepository.cs`** — Raw ADO.NET + Npgsql implementation:
-
-- Uses `NpgsqlConnection`, `NpgsqlCommand`, `NpgsqlDataReader`
-- Manual SQL queries for all CRUD operations
-- Manual mapping from DataReader rows → Expense entities
-- `GetAllAsync` orders by Date DESC
+**`Data/ConnectionProvider.cs`** — Singleton service providing NpgsqlConnection with connection string from appsettings  
+**`Repositories/ExpenseRepository.cs`** — Raw ADO.NET + Npgsql implementation with manual SQL queries and DataReader mapping  
+**`Repositories/CategoryRepository.cs`** — Raw ADO.NET + Npgsql implementation for category CRUD  
+**`Repositories/UserRepository.cs`** — Raw ADO.NET + Npgsql implementation for user CRUD and authentication lookups  
+**`Repositories/UserExpenseRepository.cs`** — Raw ADO.NET + Npgsql implementation for user-expense relationships  
+**`Data/Schema.sql`** — PostgreSQL schema with `dbo` schema, tables: categories, expenses, users, user_expenses with foreign key constraints
 
 ### API
 
-**`AuthController.cs`** — `POST /api/auth/login` compares credentials from appsettings,
-returns signed JWT + expiry.  
-**`ExpensesController.cs`** — 5 verbs (GET all, GET/:id, POST, PUT/:id, DELETE/:id),
-all decorated `[Authorize]`.  
-**`Program.cs`** — registers ConnectionProvider (DI), JWT Bearer, CORS (React origins), Swagger with
-Bearer button. No auto-migration (schema created manually or via init helper).
-**`appsettings.json`** — JWT key/issuer/audience/expiry, single-user credentials,
-CORS origins (`localhost:5173`, `localhost:3000`), PostgreSQL connection string.
+**`Controllers/AuthController.cs`** — `POST /api/auth/login` authenticates users, returns JWT + refresh token, handles token refresh  
+**`Controllers/ExpensesController.cs`** — 5 verbs (GET all, GET/:id, POST, PUT/:id, DELETE/:id), all decorated `[Authorize]`  
+**`Controllers/CategoriesController.cs`** — Category CRUD endpoints (GET all, GET/:id, POST, PUT/:id, DELETE/:id), all decorated `[Authorize]`  
+**`Controllers/UsersController.cs`** — User management endpoints (GET all, GET/:id, POST, PUT/:id, DELETE/:id), all decorated `[Authorize]`  
+**`Controllers/UserExpensesController.cs`** — User-expense relationship endpoints, all decorated `[Authorize]`  
+**`Middleware/ExceptionHandlingMiddleware.cs`** — Centralized error handling and logging for all exceptions  
+**`Program.cs`** — registers ConnectionProvider (DI), JWT Bearer, CORS (React origins), Swagger with Bearer button, ExceptionHandlingMiddleware  
+**`appsettings.json`** — JWT key/issuer/audience/expiry, CORS origins (`localhost:5173`, `localhost:3000`), PostgreSQL connection string
 
 Key middleware order in `Program.cs`:
 
@@ -158,24 +206,55 @@ CORS before auth so browser pre-flight OPTIONS requests succeed before JWT inspe
 
 ## Phase 3 — Database Schema
 
-Create the `Expenses` table manually via SQL script (or execute directly from infrastructure startup):
+Create tables via SQL script in `Infrastructure/Data/Schema.sql`:
 
 ```sql
-CREATE TABLE IF NOT EXISTS expenses (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title VARCHAR(255) NOT NULL,
-    amount NUMERIC(18, 2) NOT NULL,
-    category VARCHAR(100) NOT NULL,
-    date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE SCHEMA IF NOT EXISTS dbo;
+
+CREATE TABLE IF NOT EXISTS dbo.categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  category_name VARCHAR(255) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date DESC);
+CREATE TABLE IF NOT EXISTS dbo.expenses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title VARCHAR(255) NOT NULL,
+  amount NUMERIC(18, 2) NOT NULL CHECK (amount > 0),
+  category_name VARCHAR(255) NOT NULL,
+  date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_categories FOREIGN KEY (category_name) REFERENCES dbo.categories (category_name)
+);
+
+CREATE TABLE IF NOT EXISTS dbo.users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  firstname VARCHAR(255) NOT NULL,
+  lastname VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE,
+  refresh_token VARCHAR(512),
+  refresh_token_expiry TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS dbo.user_expenses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  expenses_id UUID NOT NULL,
+  user_id UUID NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES dbo.users (id),
+  CONSTRAINT fk_expenses FOREIGN KEY (expenses_id) REFERENCES dbo.expenses (id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_expenses_date ON dbo.expenses (date DESC);
+CREATE INDEX IF NOT EXISTS idx_users_username ON dbo.users (username);
+CREATE INDEX IF NOT EXISTS idx_userexpenses_ids ON dbo.user_expenses (user_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_ids ON dbo.user_expenses (expenses_id);
 ```
 
-**Option 1:** Execute manually on database before first run.
-**Option 2:** Add a schema initialization method in `ExpenseRepository` that runs on first connection (simple check-and-create).
-**Option 3:** Provide SQL file in `Infrastructure/Data/Schema.sql` for DBA/setup documentation.
+Execute manually on database before first run.
 
 ---
 
@@ -530,6 +609,9 @@ public async Task<ExpenseResponseDto> CreateAsync(CreateExpenseDto dto)
 | No AutoMapper | One entity → trivial manual mapping; avoids opinionated dependency |
 | `record` DTOs | Immutable value-based types; match DTO semantics exactly |
 | Manual schema creation | Keeps Infrastructure layer simple; no migration framework dependency; SQL scripts provide clear schema documentation |
-| BCrypt password | BCrypt implemented from dev up to prod |
+| BCrypt password hashing | BCrypt implemented from dev up to prod for secure password storage |
+| JWT with Refresh Tokens | Stateless authentication with short-lived access tokens and refresh token rotation |
+| Multi-user support | Extended from single-user MVP to support multiple users with user-expense relationships |
 | Infrastructure → Domain only | Clean Architecture inversion: API wires DI, Infrastructure stays decoupled from Application |
+| Centralized Exception Handling | ExceptionHandlingMiddleware for consistent error responses and logging across all endpoints |
 | Test Suite (TDD) | Testing Strategy by Layer |
