@@ -2,72 +2,152 @@ using ExpenseTracker.Application.DTOs;
 using ExpenseTracker.Application.Interfaces;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Application.Services;
 
 public class UserService : IUserService
 {
     private readonly IUserRepository _repository;
+    private readonly ILogger<UserService> _logger;
 
-    public UserService(IUserRepository repository)
+    public UserService(IUserRepository repository, ILogger<UserService> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<UserDto>> GetAllAsync()
     {
-        var users = await _repository.GetAllAsync();
-        return users.Select(MapToDto);
+        try
+        {
+            var users = await _repository.GetAllAsync();
+            return users.Select(MapToDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving all users");
+            throw;
+        }
     }
 
     public async Task<UserDto?> GetByIdAsync(Guid id)
     {
-        var user = await _repository.GetByIdAsync(id);
-        return user is null ? null : MapToDto(user);
+        try
+        {
+            var user = await _repository.GetByIdAsync(id);
+            return user is null ? null : MapToDto(user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving user with ID {UserId}", id);
+            throw;
+        }
     }
 
     public async Task<UserDto?> GetByUsernameAsync(string username)
     {
-        if (string.IsNullOrWhiteSpace(username)) return null;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(username)) return null;
 
-        var user = await _repository.GetByUsernameAsync(username.Trim());
-        return user is null ? null : MapToDto(user);
+            var user = await _repository.GetByUsernameAsync(username.Trim());
+            return user is null ? null : MapToDto(user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving user with username {Username}", username);
+            throw;
+        }
     }
 
     public async Task<UserDto> CreateAsync(CreateUserDto dto)
     {
-        ValidateUser(dto.Username, dto.PasswordHash, dto.FirstName, dto.LastName);
-
-        var user = new User
+        try
         {
-            Username = dto.Username.Trim(),
-            PasswordHash = dto.PasswordHash.Trim(),
-            FirstName = dto.FirstName.Trim(),
-            LastName = dto.LastName.Trim()
-        };
+            if (dto is null)
+                throw new ArgumentNullException(nameof(dto), "User data is required");
 
-        var created = await _repository.AddAsync(user);
-        return MapToDto(created);
+            ValidateUser(dto.Username, dto.PasswordHash, dto.FirstName, dto.LastName);
+
+            var user = new User
+            {
+                Username = dto.Username.Trim(),
+                PasswordHash = dto.PasswordHash.Trim(),
+                FirstName = dto.FirstName.Trim(),
+                LastName = dto.LastName.Trim()
+            };
+
+            var created = await _repository.AddAsync(user);
+            _logger.LogInformation("User {Username} created successfully", created.Username);
+            return MapToDto(created);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Validation error while creating user");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating user");
+            throw;
+        }
     }
 
     public async Task<UserDto?> UpdateAsync(Guid id, UpdateUserDto dto)
     {
-        ValidateUser(dto.Username, dto.PasswordHash, dto.FirstName, dto.LastName);
+        try
+        {
+            if (dto is null)
+                throw new ArgumentNullException(nameof(dto), "User data is required");
 
-        var existing = await _repository.GetByIdAsync(id);
-        if (existing is null) return null;
+            ValidateUser(dto.Username, dto.PasswordHash, dto.FirstName, dto.LastName);
 
-        existing.Username = dto.Username.Trim();
-        existing.PasswordHash = dto.PasswordHash.Trim();
-        existing.FirstName = dto.FirstName.Trim();
-        existing.LastName = dto.LastName.Trim();
+            var existing = await _repository.GetByIdAsync(id);
+            if (existing is null)
+            {
+                _logger.LogWarning("Attempt to update non-existent user with ID {UserId}", id);
+                return null;
+            }
 
-        var updated = await _repository.UpdateAsync(existing);
-        return updated is null ? null : MapToDto(updated);
+            existing.Username = dto.Username.Trim();
+            existing.PasswordHash = dto.PasswordHash.Trim();
+            existing.FirstName = dto.FirstName.Trim();
+            existing.LastName = dto.LastName.Trim();
+
+            var updated = await _repository.UpdateAsync(existing);
+            _logger.LogInformation("User with ID {UserId} updated successfully", id);
+            return updated is null ? null : MapToDto(updated);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Validation error while updating user with ID {UserId}", id);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user with ID {UserId}", id);
+            throw;
+        }
     }
 
-    public async Task<bool> DeleteAsync(Guid id) =>
-        await _repository.DeleteAsync(id);
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        try
+        {
+            var result = await _repository.DeleteAsync(id);
+            if (result)
+                _logger.LogInformation("User with ID {UserId} deleted successfully", id);
+            else
+                _logger.LogWarning("Attempt to delete non-existent user with ID {UserId}", id);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting user with ID {UserId}", id);
+            throw;
+        }
+    }
 
     private static UserDto MapToDto(User u) =>
         new(u.Id, u.Username, u.PasswordHash, u.FirstName, u.LastName, u.CreatedAt);
