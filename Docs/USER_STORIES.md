@@ -33,8 +33,8 @@ As a budget-conscious user, I want to securely log, view, edit, and delete my da
 **Acceptance Criteria:**
 
 - POST `/api/expenses` requires [Authorize] header with valid JWT
-- Accepts JSON: { title, amount, category, date }
-- Validates: title (1-255 chars), amount (>0, ≤999999.99), category (1-100 chars)
+- Accepts JSON: { title, amount, categoryName, date }
+- Validates: title (1-255 chars), amount (>0, ≤999999.99), categoryName (1-255 chars)
 - Returns 400 Bad Request for invalid data
 - Persists to PostgreSQL with UUID and timestamp
 - Returns 201 Created with complete expense object including ID
@@ -81,7 +81,7 @@ As a budget-conscious user, I want to securely log, view, edit, and delete my da
 **Acceptance Criteria:**
 
 - PUT `/api/expenses/{id}` requires [Authorize]
-- Accepts JSON: { title, amount, category, date }
+- Accepts JSON: { title, amount, categoryName, date }
 - Validates same rules as Create (US-B2)
 - Returns 404 if expense not found
 - Returns 400 for invalid data
@@ -129,7 +129,10 @@ As a budget-conscious user, I want to securely log, view, edit, and delete my da
 
 **Acceptance Criteria:**
 
-- Expenses table exists with schema: id (UUID), title, amount, category, date, created_at
+- Expenses table exists with schema: id (UUID), title, amount, category_name (FK), date, created_at
+- Categories table exists with schema: id (UUID), category_name (UNIQUE), created_at
+- Users table exists with schema: id (UUID), username (UNIQUE), password_hash, firstname, lastname, email (UNIQUE), refresh_token, refresh_token_expiry, created_at
+- UserExpenses junction table exists with schema: id (UUID), expenses_id (FK), user_id (FK), created_at
 - All CRUD operations use ADO.NET with NpgsqlConnection
 - Database connection string loaded from appsettings.json
 - Numeric precision: amount stored as NUMERIC(18,2)
@@ -183,7 +186,7 @@ As a budget-conscious user, I want to securely log, view, edit, and delete my da
 
 **Acceptance Criteria:**
 
-- Form has input fields: Title, Amount, Category (dropdown or text), Date (date picker)
+- Form has input fields: Title, Amount, CategoryName (dropdown or text), Date (date picker)
 - Submit button labeled "Add Expense" or "Save"
 - Validate client-side: title not empty, amount > 0, category not empty
 - Show validation errors inline before submission
